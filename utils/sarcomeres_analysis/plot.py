@@ -39,6 +39,19 @@ def movie(img):
     plt.close(fig)
     return ani
 
+def draw_lines_napari(viewer, img):
+    lines = []
+    for coord in viewer.layers[1].data:
+        lines.append(line(int(coord[0,2]), int(coord[0,1]), int(coord[1,2]), int(coord[1,1])))
+
+    plt.imshow(img[0])
+    cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
+    for i, li in enumerate(lines):
+        plt.plot(li[0], li[1], c=cycle[i])
+
+    return lines
+
 def draw_lines(img):
     matplotlib.use('Qt5Agg')
 

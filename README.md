@@ -3,6 +3,9 @@ Assessing Sarcomeres length over time - HaoDi Wu from Joseph Wu lab
 
 ## Setup
 1 - Download [Anaconda](https://www.anaconda.com/download/), a free installer that includes Python and all the common scientific packages.
+Be sure to download Anaconda for Python 3.6 or 3.7 for the appropriate operating system.
+Follow the on-screen instructions for installation. When prompted, be sure to "Install for me only."
+You may be prompted for optional installations, like PyCharm. You will not need it.
 
 2- Clone (or download) the repository
 
@@ -12,36 +15,41 @@ Assessing Sarcomeres length over time - HaoDi Wu from Joseph Wu lab
 git clone https://github.com/bioimage-analysis/Haodi_sarcomere
 ```
 
-3- Go into the directory
+3- Go into the directory using the command line
 
 ```
-cd Chloe_Chromosome_detection/
+$ cd /../Haodi_sarcomere/
 ```
 
-4- Create a conda environment with an Ipython kernel:
+4- Create a conda environment with the dependency:
+
+```
+$ conda env create -f environment.yml
+```
 
 (To install python / conda on a Window environment you can follow this [LINK](https://medium.com/@GalarnykMichael/install-python-on-windows-anaconda-c63c7c3d1444))
 
 ```
- conda create --name name_env python=3 ipykernel
+$ conda env create -f environment.yml
 ```
 
 5- Activate your conda environment:
 
 ```
-source activate name_env
+$ conda activate haodi_env
 ```
 
-6- Install dependency from the requirements.txt :
+6- To go back to your master environment:
 
 ```
-pip install -r requirements.txt
+$ conda deactivate
 ```
+
 (The installation of python-bioformats / javabridge might fail, if so, download Java Dev. kit, [here](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html))
 
 ## Usage
 
-cd to the notebook directory and lunch jupyter notebook:
+from the command line cd to the notebook directory and lunch jupyter notebook:
 
 ```
 jupyter notebook

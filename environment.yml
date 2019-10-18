@@ -1,0 +1,14 @@
+name: haodi_env
+channels:
+  - conda-forge
+dependencies:
+    - python == 3.6
+    - numpy == 1.12
+    - scipy == 1.0
+    - matplotlib == 2.1
+    - scikit-image == 0.16
+    - notebook == 4.0
+    - jupyter_client == 5.1.0
+    - javabridge==1.0.18
+    - napari==0.2.2
+    - python-bioformats==1.5.2
