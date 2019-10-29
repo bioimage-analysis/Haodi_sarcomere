@@ -5,6 +5,59 @@ import matplotlib.pyplot as plt
 from scipy.signal import find_peaks, peak_widths, peak_prominences
 import pandas as pd
 
+
+def dist_sarco(img, meta, lines, directory, plot=False, save = False):
+    dist = np.empty((len(lines), len(img)))
+    for frame, im in enumerate(img):
+        for num, li in enumerate(lines):
+            peak, _ = find_peaks(im[li[1], li[0]], distance=7)
+            dist_p = np.diff(peak)*meta['PhysicalSizeX']
+            dist[num, frame] = np.mean(dist_p)
+
+    dist_smooth = []
+    for i in range(len(dist)):
+        dist_smooth.append(savgol_filter(dist[i], 31, 5))
+
+    if plot:
+        fig, ax = plt.subplots(nrows = 1+(len(dist)*2), figsize=(12,36))
+        ax[0].imshow(img[0])
+
+        cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
+        for i, li in enumerate(lines):
+            ax[0].plot(li[0], li[1], c=cycle[i])
+        k=0
+        j=1
+        for i in range(len(dist)):
+            k+=2
+
+            ax[j].plot(meta['Timepoint']*100, dist[i], label="Raw Data")
+            ax[j].plot(meta['Timepoint']*100, dist_smooth[i], label="Smoothed Data", c = cycle[i-1])
+            ax[j].legend()
+            ax[j].set_xlabel('Time in ms')
+            ax[j].set_ylabel('Sarcomere length (um)')
+            ax[j].set_title('Example 1')
+
+            positive_raw = 100-((dist[i] / np.percentile(dist[i], 90)))*100
+            positive_smooth = 100-((dist_smooth[i] / np.percentile(dist_smooth[i], 90)))*100
+
+            ax[k].plot(meta['Timepoint']*100, positive_raw, label="Raw Data")
+            ax[k].plot(meta['Timepoint']*100, positive_smooth, label="Smoothed Data")
+            ax[k].legend()
+            ax[k].set_xlabel('Time in ms')
+            ax[k].set_ylabel('Sarcomere shortening (%)')
+
+            j+=2
+        plt.savefig("sarcomere_ex1_data.pdf", transparent=True)
+
+        if save:
+            try:
+                filename = meta['Name']+'.pdf'
+                plt.savefig(directory+'/'+filename, transparent=True)
+            except FileNotFoundError:
+                plt.savefig(filename, transparent=True)
+    return dist_smooth
+
 def av_dist_sarco(img, meta, lines, directory, plot=True, save = False):
     mean_time = np.empty(len(img))
     for frame, im in enumerate(img):
@@ -53,7 +106,7 @@ def av_dist_sarco(img, meta, lines, directory, plot=True, save = False):
                 plt.savefig(filename, transparent=True)
     return mean_time_smooth
 
-def to_dataframe(result, meta, directory, save=False):
+def to_dataframe(result, meta, directory, line_num="average", save=False):
     peaks, _ = find_peaks(-result, distance=50)
     SS = peak_prominences(-result, peaks, wlen = 70)
     CD50 = peak_widths(-result, peaks, rel_height=0.5, prominence_data=SS)
@@ -71,8 +124,8 @@ def to_dataframe(result, meta, directory, save=False):
     df['Time to peak in msec'] = peaks*time_frame - SS[1]*time_frame
     df['CD90 in msec'] = CD90[0] * time_frame
     df['CD50 in msec'] = CD50[0] * time_frame
-    df['Max contractile in msec'] = max_contract
-    df['Max relaxation in msec'] = max_relax
+    df['Max contractile in um/msec'] = max_contract
+    df['Max relaxation in um/msec'] = max_relax
     int_peak = np.zeros(len(peaks), 'int')
     int_peak[1:] = np.diff(peaks)
     df['Peak intervals in ms'] = int_peak *time_frame
@@ -82,8 +135,8 @@ def to_dataframe(result, meta, directory, save=False):
 
     if save == True:
         try:
-            df.to_csv(directory+'/'+'{}.csv'.format(meta["Name"]))
+            df.to_csv(directory+'/'+'line'+line_num+'_'+'{}.csv'.format(meta["Name"]))
         except FileNotFoundError:
-            df.to_csv('{}.csv'.format(meta["Name"]))
+            df.to_csv('line'+line_num+'_'+'{}.csv'.format(meta["Name"]))
 
     return df
